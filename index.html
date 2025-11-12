@@ -31,7 +31,7 @@
       background: #fff;
       border-radius: 12px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-      padding: 10px; /* un poco de margen interno */
+      padding: 10px;
     }
 
     .carousel-images {
@@ -42,14 +42,12 @@
 
     .carousel-images img {
       width: auto;
-      height: 80vh; /* ajusta según tu preferencia (por ejemplo 90vh o 70vh) */
+      height: 80vh;
       object-fit: contain;
       border-radius: 12px;
       display: block;
     }
 
-    /* Flechas más cerca de la imagen */
-    /* Flechas generales */
     .btn {
       position: absolute;
       top: 50%;
@@ -73,16 +71,14 @@
       transform: translateY(-50%) scale(1.1);
     }
 
-    /* Posición para pantallas grandes */
     .prev {
-      left: calc(50% - 220px); /* ajustá según el ancho real de tus fotos */
+      left: calc(50% - 220px);
     }
 
     .next {
       right: calc(50% - 220px);
     }
 
-    /* ✅ Móviles: botones más pequeños y pegados al borde de la imagen */
     @media (max-width: 700px) {
       .btn {
         width: 32px;
@@ -99,18 +95,15 @@
       }
     }
 
-
     footer {
       margin-top: 20px;
       color: #777;
       font-size: 0.9rem;
     }
-
   </style>
 </head>
 
 <body>
-
   <h1>My Photo Carousel</h1>
 
   <div class="carousel">
@@ -123,47 +116,47 @@
 
   <script>
     let index = 0;
+    let total = 0;
+
+    const slides = document.getElementById("carousel-images");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+
+    function showSlide(idx) {
+      const all = slides.querySelectorAll('img');
+      all.forEach((img, i) => {
+        img.style.display = i === idx ? 'block' : 'none';
+      });
+    }
+
+    function moveSlide(step) {
+      index = (index + step + total) % total;
+      showSlide(index);
+    }
 
     fetch('images.json')
       .then(res => res.json())
       .then(images => {
-        const slides = document.getElementById("carousel-images");
-
         images.forEach(src => {
           const img = document.createElement('img');
           img.src = src;
           img.alt = 'photo';
           slides.appendChild(img);
         });
-
-        const total = slides.children.length;
-        let index = 0;
-
-        // ✅ Ajuste clave: usar scroll en lugar de transform
-        function showSlide(idx) {
-          const all = slides.querySelectorAll('img');
-          all.forEach((img, i) => {
-            img.style.display = i === idx ? 'block' : 'none';
-          });
-        }
-
-        function moveSlide(step) {
-          index = (index + step + total) % total;
-          showSlide(index);
-        }
-
-        document.getElementById("prevBtn").addEventListener("click", () => moveSlide(-1));
-        document.getElementById("nextBtn").addEventListener("click", () => moveSlide(1));
-
-        showSlide(0); // Mostrar la primera imagen al inicio
+        total = slides.children.length;
+        showSlide(0);
       })
       .catch(err => console.error("Error loading images.json", err));
 
-  </script>
+    // ✅ Detectar si es dispositivo táctil
+    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
-  <script>
-    // Detectar si es pantalla táctil
-    if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+    if (isTouch) {
+      // Ocultar flechas en mobile
+      prevBtn.style.display = 'none';
+      nextBtn.style.display = 'none';
+
+      // Habilitar swipe
       const carousel = document.querySelector('.carousel');
       let startX = 0;
       let endX = 0;
@@ -178,17 +171,16 @@
 
       carousel.addEventListener('touchend', () => {
         const diff = endX - startX;
-
-        if (Math.abs(diff) > 50) { // deslizó suficiente
-          if (diff < 0) moveSlide(1);   // deslizó hacia la izquierda → siguiente
-          else moveSlide(-1);           // deslizó hacia la derecha → anterior
+        if (Math.abs(diff) > 50) {
+          if (diff < 0) moveSlide(1);  // siguiente
+          else moveSlide(-1);          // anterior
         }
-
-        startX = 0;
-        endX = 0;
       });
+    } else {
+      // Desktop: usar botones
+      prevBtn.addEventListener("click", () => moveSlide(-1));
+      nextBtn.addEventListener("click", () => moveSlide(1));
     }
-</script>
-
+  </script>
 </body>
 </html>
