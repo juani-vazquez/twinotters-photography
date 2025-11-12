@@ -160,6 +160,35 @@
       .catch(err => console.error("Error loading images.json", err));
 
   </script>
+  
+  <script>
+  // Detectar si es pantalla táctil
+  if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+    const carousel = document.querySelector('.carousel');
+    let startX = 0;
+    let endX = 0;
+
+    carousel.addEventListener('touchstart', (e) => {
+      startX = e.touches[0].clientX;
+    });
+
+    carousel.addEventListener('touchmove', (e) => {
+      endX = e.touches[0].clientX;
+    });
+
+    carousel.addEventListener('touchend', () => {
+      const diff = endX - startX;
+
+      if (Math.abs(diff) > 50) { // deslizó suficiente
+        if (diff < 0) moveSlide(1);   // deslizó hacia la izquierda → siguiente
+        else moveSlide(-1);           // deslizó hacia la derecha → anterior
+      }
+
+      startX = 0;
+      endX = 0;
+    });
+  }
+</script>
 
 </body>
 </html>
