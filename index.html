@@ -87,39 +87,42 @@
 
   <div class="carousel">
     <div class="carousel-images" id="carousel-images"></div>
-
-    <script>
-      fetch('images.json')
-        .then(res => res.json())
-        .then(images => {
-          const gallery = document.getElementById('carousel-images');
-          images.forEach(src => {
-            const img = document.createElement('img');
-            img.src = src;
-            img.alt = 'photo';
-            gallery.appendChild(img);
-          });
-        });
-    </script>
-
-    <button class="btn prev" onclick="moveSlide(-1)">❮</button>
-    <button class="btn next" onclick="moveSlide(1)">❯</button>
+    <button class="btn prev" id="prevBtn">❮</button>
+    <button class="btn next" id="nextBtn">❯</button>
   </div>
 
-  <footer>© 2025 Twinotters - All Rights Reserved</footer>
+  <footer>© 2025 Saraih — All Rights Reserved</footer>
 
   <script>
     let index = 0;
-    const slides = document.getElementById("carousel-images");
-    const total = slides.children.length;
 
-    function moveSlide(step) {
-      index = (index + step + total) % total;
-      slides.style.transform = `translateX(-${index * 100}%)`;
-    }
+    fetch('images.json')
+      .then(res => res.json())
+      .then(images => {
+        const slides = document.getElementById("carousel-images");
 
-    // Optional: auto-play every 5 seconds
-    // setInterval(() => moveSlide(1), 5000);
+        // Crear las imágenes dinámicamente
+        images.forEach(src => {
+          const img = document.createElement('img');
+          img.src = src;
+          img.alt = 'photo';
+          slides.appendChild(img);
+        });
+
+        const total = slides.children.length;
+
+        function moveSlide(step) {
+          index = (index + step + total) % total;
+          slides.style.transform = `translateX(-${index * 100}%)`;
+        }
+
+        document.getElementById("prevBtn").addEventListener("click", () => moveSlide(-1));
+        document.getElementById("nextBtn").addEventListener("click", () => moveSlide(1));
+
+        // Optional: auto-play every 5 seconds
+        // setInterval(() => moveSlide(1), 5000);
+      })
+      .catch(err => console.error("Error loading images.json", err));
   </script>
 
 </body>
