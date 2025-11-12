@@ -27,23 +27,30 @@
       position: relative;
       width: 90%;
       max-width: 800px;
+      height: 90vh; /* ocupa casi toda la pantalla, mantiene verticalidad */
       overflow: hidden;
       border-radius: 12px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .carousel-images {
       display: flex;
       transition: transform 0.5s ease-in-out;
-      width: 100%;
+      height: 100%;
     }
 
     .carousel-images img {
-      width: 100%;
-      height: 100%;
+      width: auto;            /* ✅ no forzar ancho */
+      height: 100%;           /* ✅ que la altura llene el carrusel */
       flex-shrink: 0;
       border-radius: 12px;
-      object-fit: contain;
+      object-fit: contain;    /* ✅ sin recortes, mantiene proporción */
+      background-color: #000; /* fondo negro si hay espacio lateral */
+      margin: 0 auto;
     }
 
     .btn {
