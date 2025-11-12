@@ -64,15 +64,29 @@
 <body>
   <header>
     <h1>My Photo Gallery</h1>
-    <p>Nature & Street Photography by Saraih</p>
+    <p>Nature & Street Photography by Twinotters</p>
   </header>
 
-  <div class="gallery">
-    <img src="images/IMG_20251111_133205_269_edited.jpg" alt="Nature">
-  </div>
+  <div id= "gallery" class="gallery"></div>
+  
+  <script>
+    fetch('images.json')
+      .then(res => res.json())
+      .then(images => {
+        const gallery = document.getElementById('gallery');
+        images.forEach(src => {
+          const img = document.createElement('img');
+          img.src = src;
+          img.alt = 'photo';
+          gallery.appendChild(img);
+        });
+      });
+  </script>
+  
 
   <footer>
     © 2025 Twinotters — All Rights Reserved
   </footer>
 </body>
 </html>
+
