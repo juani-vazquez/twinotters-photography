@@ -108,7 +108,6 @@
       .then(images => {
         const slides = document.getElementById("carousel-images");
 
-        // Crear las imágenes dinámicamente
         images.forEach(src => {
           const img = document.createElement('img');
           img.src = src;
@@ -117,19 +116,28 @@
         });
 
         const total = slides.children.length;
+        let index = 0;
+
+        // ✅ Ajuste clave: usar scroll en lugar de transform
+        function showSlide(idx) {
+          const all = slides.querySelectorAll('img');
+          all.forEach((img, i) => {
+            img.style.display = i === idx ? 'block' : 'none';
+          });
+        }
 
         function moveSlide(step) {
           index = (index + step + total) % total;
-          slides.style.transform = `translateX(-${index * 100}%)`;
+          showSlide(index);
         }
 
         document.getElementById("prevBtn").addEventListener("click", () => moveSlide(-1));
         document.getElementById("nextBtn").addEventListener("click", () => moveSlide(1));
 
-        // Optional: auto-play every 5 seconds
-        // setInterval(() => moveSlide(1), 5000);
+        showSlide(0); // Mostrar la primera imagen al inicio
       })
       .catch(err => console.error("Error loading images.json", err));
+
   </script>
 
 </body>
