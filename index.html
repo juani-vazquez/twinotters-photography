@@ -3,91 +3,124 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Photo Gallery</title>
+  <title>Saraih Photo Carousel</title>
   <style>
     body {
       margin: 0;
       font-family: 'Poppins', sans-serif;
-      background-color: #f8f8f8;
-      color: #333;
+      background: #111;
+      color: #fff;
       display: flex;
       flex-direction: column;
       align-items: center;
+      height: 100vh;
+      justify-content: center;
     }
 
-    header {
+    h1 {
+      margin-bottom: 20px;
+      font-size: 1.8rem;
       text-align: center;
-      padding: 40px 20px 20px;
     }
 
-    header h1 {
-      font-size: 2.5rem;
-      margin-bottom: 10px;
+    .carousel {
+      position: relative;
+      width: 90%;
+      max-width: 800px;
+      overflow: hidden;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
     }
 
-    header p {
-      font-size: 1rem;
-      color: #777;
-    }
-
-    .gallery {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 15px;
-      padding: 20px;
+    .carousel-images {
+      display: flex;
+      transition: transform 0.5s ease-in-out;
       width: 100%;
-      max-width: 1200px;
-      box-sizing: border-box;
     }
 
-    .gallery img {
+    .carousel-images img {
       width: 100%;
-      height: 100%;
+      height: auto;
+      flex-shrink: 0;
+      border-radius: 12px;
       object-fit: cover;
-      border-radius: 10px;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
-    .gallery img:hover {
-      transform: scale(1.05);
-      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    .btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0,0,0,0.5);
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      cursor: pointer;
+      border-radius: 50%;
+      font-size: 1.2rem;
+      transition: background 0.3s;
+    }
+
+    .btn:hover {
+      background: rgba(0,0,0,0.8);
+    }
+
+    .prev { left: 10px; }
+    .next { right: 10px; }
+
+    @media (max-width: 600px) {
+      .btn {
+        padding: 8px 12px;
+        font-size: 1rem;
+      }
     }
 
     footer {
-      text-align: center;
-      padding: 30px;
-      color: #888;
+      margin-top: 20px;
+      color: #777;
       font-size: 0.9rem;
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1>My Photo Gallery</h1>
-    <p>Nature & Street Photography by Twinotters</p>
-  </header>
 
-  <div id= "gallery" class="gallery"></div>
-  
-  <script>
-    fetch('images.json')
-      .then(res => res.json())
-      .then(images => {
-        const gallery = document.getElementById('gallery');
-        images.forEach(src => {
-          const img = document.createElement('img');
-          img.src = src;
-          img.alt = 'photo';
-          gallery.appendChild(img);
+  <h1>My Photo Carousel</h1>
+
+  <div class="carousel">
+    <div class="carousel-images" id="carousel-images"></div>
+
+    <script>
+      fetch('images.json')
+        .then(res => res.json())
+        .then(images => {
+          const gallery = document.getElementById('carousel-images');
+          images.forEach(src => {
+            const img = document.createElement('img');
+            img.src = src;
+            img.alt = 'photo';
+            gallery.appendChild(img);
+          });
         });
-      });
-  </script>
-  
+    </script>
 
-  <footer>
-    © 2025 Twinotters - All Rights Reserved
-  </footer>
+    <button class="btn prev" onclick="moveSlide(-1)">❮</button>
+    <button class="btn next" onclick="moveSlide(1)">❯</button>
+  </div>
+
+  <footer>© 2025 Twinotters - All Rights Reserved</footer>
+
+  <script>
+    let index = 0;
+    const slides = document.getElementById("carousel-images");
+    const total = slides.children.length;
+
+    function moveSlide(step) {
+      index = (index + step + total) % total;
+      slides.style.transform = `translateX(-${index * 100}%)`;
+    }
+
+    // Optional: auto-play every 5 seconds
+    // setInterval(() => moveSlide(1), 5000);
+  </script>
+
 </body>
 </html>
-
-
