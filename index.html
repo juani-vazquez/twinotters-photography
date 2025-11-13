@@ -2,57 +2,68 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport"
+        content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Twinotters' Photo Gallery</title>
   <style>
-    body {
+    /* 🔹 Reset + asegurar pantalla completa */
+    html, body {
       margin: 0;
-      font-family: 'Poppins', sans-serif;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden; /* Evita scroll y desplazamientos */
       background: #fff;
+      font-family: 'Poppins', sans-serif;
       color: #111;
       display: flex;
       flex-direction: column;
       align-items: center;
-      height: 100vh;
       justify-content: center;
     }
 
     h1 {
-      margin-bottom: 20px;
-      font-size: 1.8rem;
+      margin: 10px 0;
+      font-size: 1.4rem;
       text-align: center;
+      flex-shrink: 0;
     }
 
+    /* 🔹 Carrusel ocupa el espacio restante */
     .carousel {
       position: relative;
       display: flex;
       align-items: center;
       justify-content: center;
+      flex: 1; /* ocupa toda la altura disponible */
+      width: 100%;
+      max-width: 100vw;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
       background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-      padding: 10px;
     }
 
     .carousel-images {
+      width: 100%;
+      height: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
     .carousel-images img {
-      width: auto;
-      height: 80vh;
+      max-width: 100%;
+      max-height: 100%;
       object-fit: contain;
-      border-radius: 12px;
-      display: block;
+      border-radius: 8px;
+      display: none;
     }
 
     .btn {
       position: absolute;
       top: 50%;
       transform: translateY(-50%);
-      background: rgba(0, 0, 0, 0.5);
+      background: rgba(0, 0, 0, 0.4);
       color: white;
       border: none;
       width: 40px;
@@ -64,19 +75,23 @@
       border-radius: 50%;
       font-size: 1.2rem;
       transition: background 0.3s, transform 0.2s;
+      z-index: 10;
     }
 
     .btn:hover {
-      background: rgba(0, 0, 0, 0.8);
+      background: rgba(0, 0, 0, 0.7);
       transform: translateY(-50%) scale(1.1);
     }
 
-    .prev {
-      left: calc(50% - 220px);
-    }
+    .prev { left: 10px; }
+    .next { right: 10px; }
 
-    .next {
-      right: calc(50% - 220px);
+    footer {
+      margin: 5px 0;
+      color: #777;
+      font-size: 0.8rem;
+      text-align: center;
+      flex-shrink: 0;
     }
 
     @media (max-width: 700px) {
@@ -85,28 +100,15 @@
         height: 32px;
         font-size: 1rem;
       }
-
-      .prev {
-        left: 10px;
-      }
-
-      .next {
-        right: 10px;
-      }
-    }
-
-    footer {
-      margin-top: 20px;
-      color: #777;
-      font-size: 0.9rem;
     }
   </style>
 </head>
 
 <body>
+
   <h1>My Photo Carousel</h1>
 
-  <div class="carousel">
+  <div class="carousel" id="carousel">
     <div class="carousel-images" id="carousel-images"></div>
     <button class="btn prev" id="prevBtn">❮</button>
     <button class="btn next" id="nextBtn">❯</button>
@@ -118,12 +120,27 @@
     let index = 0;
     let total = 0;
 
-    const slides = document.getElementById("carousel-images");
-    const prevBtn = document.getElementById("prevBtn");
-    const nextBtn = document.getElementById("nextBtn");
+    fetch('images.json')
+      .then(res => res.json())
+      .then(images => {
+        const slides = document.getElementById("carousel-images");
+        images.forEach(src => {
+          const img = document.createElement('img');
+          img.src = src;
+          img.alt = 'photo';
+          slides.appendChild(img);
+        });
+
+        total = slides.children.length;
+        showSlide(0);
+
+        document.getElementById("prevBtn").addEventListener("click", () => moveSlide(-1));
+        document.getElementById("nextBtn").addEventListener("click", () => moveSlide(1));
+      })
+      .catch(err => console.error("Error loading images.json", err));
 
     function showSlide(idx) {
-      const all = slides.querySelectorAll('img');
+      const all = document.querySelectorAll('#carousel-images img');
       all.forEach((img, i) => {
         img.style.display = i === idx ? 'block' : 'none';
       });
@@ -134,53 +151,26 @@
       showSlide(index);
     }
 
-    fetch('images.json')
-      .then(res => res.json())
-      .then(images => {
-        images.forEach(src => {
-          const img = document.createElement('img');
-          img.src = src;
-          img.alt = 'photo';
-          slides.appendChild(img);
-        });
-        total = slides.children.length;
-        showSlide(0);
-      })
-      .catch(err => console.error("Error loading images.json", err));
-
-    // ✅ Detectar si es dispositivo táctil
-    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-
-    if (isTouch) {
-      // Ocultar flechas en mobile
-      prevBtn.style.display = 'none';
-      nextBtn.style.display = 'none';
-
-      // Habilitar swipe
-      const carousel = document.querySelector('.carousel');
+    // ✅ Swipe detection solo si es touchscreen
+    if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+      const carousel = document.getElementById('carousel');
       let startX = 0;
-      let endX = 0;
 
       carousel.addEventListener('touchstart', (e) => {
         startX = e.touches[0].clientX;
-      });
+      }, { passive: true });
 
-      carousel.addEventListener('touchmove', (e) => {
-        endX = e.touches[0].clientX;
-      });
-
-      carousel.addEventListener('touchend', () => {
+      carousel.addEventListener('touchend', (e) => {
+        const endX = e.changedTouches[0].clientX;
         const diff = endX - startX;
+
         if (Math.abs(diff) > 50) {
-          if (diff < 0) moveSlide(1);  // siguiente
-          else moveSlide(-1);          // anterior
+          if (diff < 0) moveSlide(1);
+          else moveSlide(-1);
         }
-      });
-    } else {
-      // Desktop: usar botones
-      prevBtn.addEventListener("click", () => moveSlide(-1));
-      nextBtn.addEventListener("click", () => moveSlide(1));
+      }, { passive: true });
     }
   </script>
+
 </body>
 </html>
