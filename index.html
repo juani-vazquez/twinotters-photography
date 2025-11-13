@@ -16,17 +16,50 @@
       align-items: center;
     }
 
+    header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 40px;
+      box-sizing: border-box;
+      background: #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo img {
+      height: 40px;
+      width: 40px;
+      border-radius: 8px;
+    }
+
+    .logo span {
+      font-weight: 600;
+      font-size: 1.2rem;
+      letter-spacing: 0.5px;
+    }
+
     h1 {
-      margin: 20px 0;
-      font-size: 2rem;
+      margin: 50px 0 20px;
+      font-size: 2.2rem;
       text-align: center;
+      letter-spacing: 1px;
     }
 
     .gallery {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 15px;
-      padding: 20px;
+      gap: 20px;
+      padding: 20px 40px;
       width: 100%;
       max-width: 1200px;
       box-sizing: border-box;
@@ -41,21 +74,49 @@
     }
 
     .gallery img:hover {
-      transform: scale(1.02);
+      transform: scale(1.03);
       box-shadow: 0 6px 16px rgba(0,0,0,0.3);
     }
 
     footer {
-      margin: 30px 0;
+      margin: 50px 0 30px;
       color: #777;
       font-size: 0.9rem;
+      text-align: center;
+    }
+
+    @media (max-width: 600px) {
+      header {
+        flex-direction: column;
+        gap: 10px;
+        padding: 15px 20px;
+      }
+
+      .logo img {
+        height: 32px;
+        width: 32px;
+      }
+
+      h1 {
+        font-size: 1.8rem;
+        margin: 30px 0 10px;
+      }
     }
   </style>
 </head>
 <body>
+  <header>
+    <div class="logo">
+      <img src="favicon.png" alt="Twinotters logo">
+      <span>Twinotters</span>
+    </div>
+  </header>
+
   <h1>My Photo Gallery</h1>
+
   <div class="gallery" id="gallery"></div>
-  <footer>© 2025 Twinotters - All Rights Reserved</footer>
+
+  <footer>© 2025 Twinotters — All Rights Reserved</footer>
 
   <script>
     const username = "juani-vazquez"; 
