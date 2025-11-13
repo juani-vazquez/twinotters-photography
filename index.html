@@ -1,54 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Twinotters Photo Gallery</title>
   <style>
-    body {
-      margin: 0;
-      font-family: 'Poppins', sans-serif;
-      background: #fefefe;
-      color: #222;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    h1 {
-      margin: 20px 0;
-      font-size: 2rem;
-      text-align: center;
-    }
-
-    .gallery {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 15px;
-      padding: 20px;
-      width: 100%;
-      max-width: 1200px;
-      box-sizing: border-box;
-    }
-
-    .gallery img {
-      width: 100%;
-      height: auto;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .gallery img:hover {
-      transform: scale(1.02);
-      box-shadow: 0 6px 16px rgba(0,0,0,0.3);
-    }
-
-    footer {
-      margin: 30px 0;
-      color: #777;
-      font-size: 0.9rem;
-    }
+    body{margin:0;font-family:Poppins, sans-serif;background:#fefefe;color:#222;display:flex;flex-direction:column;align-items:center}
+    h1{margin:20px 0;font-size:2rem}
+    .gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:15px;padding:20px;width:100%;max-width:1200px;box-sizing:border-box}
+    .gallery img{width:100%;height:auto;border-radius:10px;box-shadow:0 4px 10px rgba(0,0,0,0.2);transition:transform .3s,box-shadow .3s}
+    .gallery img:hover{transform:scale(1.02);box-shadow:0 6px 16px rgba(0,0,0,0.3)}
+    footer{margin:30px 0;color:#777;font-size:.9rem}
   </style>
 </head>
 <body>
@@ -57,9 +19,10 @@
   <footer>© 2025 Twinotters — All Rights Reserved</footer>
 
   <script>
-    const username = "juani-vazquez"; // 👈 tu usuario de GitHub
-    const repo = "twinotters-photography"; // 👈 el nombre del repo
-    const folder = "images"; // 👈 carpeta donde subís las fotos
+    const username = "juani-vazquez";
+    const repo = "twinotters-photography";
+    const folder = "images";
+    const branch = "main"; // <- cambialo si tu rama es 'master' u otra
 
     const apiUrl = `https://api.github.com/repos/${username}/${repo}/contents/${folder}`;
 
@@ -67,16 +30,20 @@
       const gallery = document.getElementById("gallery");
       try {
         const res = await fetch(apiUrl);
+        if (!res.ok) throw new Error('GitHub API error: ' + res.status);
         const data = await res.json();
 
         data
-          .filter(file => file.type === "file" && /\.(jpg|jpeg|png|gif)$/i.test(file.name))
+          .filter(file => file.type === "file" && /\.(jpg|jpeg|png|gif|webp)$/i.test(file.name))
           .forEach(file => {
+            // Construir URL vía jsDelivr (CDN)
+            const cdnUrl = `https://cdn.jsdelivr.net/gh/${username}/${repo}@${branch}/${folder}/${encodeURIComponent(file.name)}`;
             const img = document.createElement("img");
-            img.src = file.download_url.replace("github.com", "raw.githubusercontent.com").replace("/blob/", "/");
+            img.src = cdnUrl;
             img.alt = file.name;
             gallery.appendChild(img);
           });
+
       } catch (err) {
         console.error("Error cargando imágenes:", err);
         gallery.innerHTML = "<p>No se pudieron cargar las imágenes.</p>";
