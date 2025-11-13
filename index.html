@@ -1,150 +1,89 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Twinotters Debug Gallery</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Twinotters Photo Gallery</title>
   <style>
-    body{margin:0;font-family:Inter, Poppins, sans-serif;background:#fff;color:#111;display:flex;flex-direction:column;align-items:center}
-    h1{margin:20px 0;font-size:1.6rem}
-    #diagnostics{width:90%;max-width:900px;background:#f7f7f7;border:1px solid #eee;padding:12px;border-radius:8px;margin-bottom:16px;font-family:monospace;color:#333}
-    .gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;padding:10px;width:100%;max-width:1200px;box-sizing:border-box}
-    .gallery img{width:100%;height:auto;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.08);display:block}
-    .error{color:#b02a37}
-    footer{margin:24px 0 40px;color:#666;font-size:0.9rem}
-    .small{font-size:0.9rem;color:#555}
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: #fefefe;
+      color: #222;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      margin: 20px 0;
+      font-size: 2rem;
+      text-align: center;
+    }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 15px;
+      padding: 20px;
+      width: 100%;
+      max-width: 1200px;
+      box-sizing: border-box;
+    }
+
+    .gallery img {
+      width: 100%;
+      height: auto;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .gallery img:hover {
+      transform: scale(1.02);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+    }
+
+    footer {
+      margin: 30px 0;
+      color: #777;
+      font-size: 0.9rem;
+    }
   </style>
 </head>
 <body>
-  <h1>Twinotters — Debug Gallery</h1>
-
-  <div id="diagnostics">Iniciando comprobaciones...</div>
-
+  <h1>My Photo Gallery</h1>
   <div class="gallery" id="gallery"></div>
+  <footer>© 2025 Twinotters - All Rights Reserved</footer>
 
-  <footer>© 2025 Twinotters — Debug mode</footer>
+  <script>
+    const username = "juani-vazquez"; 
+    const repo = "twinotters-photography";
+    const folder = "images"; 
 
-<script>
-(async function(){
-  // CONFIG - reemplaza si corresponde
-  const username = "juani-vazquez";
-  const repo = "twinotters-photography";
-  const folder = "images";
-  const branch = "main"; // si tu rama es 'master' cambia a 'master'
+    const apiUrl = `https://api.github.com/repos/${username}/${repo}/contents/${folder}`;
 
-  const diag = document.getElementById('diagnostics');
-  const gallery = document.getElementById('gallery');
-
-  function logDiag(...parts){
-    console.log(...parts);
-    diag.innerHTML += "<div>" + parts.map(p => {
-      if (typeof p === 'object') return JSON.stringify(p);
-      return String(p);
-    }).join(' ') + "</div>";
-  }
-
-  // 1) Probar GitHub API para listar carpeta
-  const apiUrl = `https://api.github.com/repos/${username}/${repo}/contents/${folder}`;
-  logDiag("→ Solicitando API:", apiUrl);
-
-  let data;
-  try {
-    const res = await fetch(apiUrl);
-    logDiag("API status:", res.status, res.statusText);
-    // intentar leer cabeceras útiles (si disponible)
-    try {
-      const remaining = res.headers.get('x-ratelimit-remaining');
-      const limit = res.headers.get('x-ratelimit-limit');
-      if (remaining !== null) logDiag(`Rate limit: ${remaining}/${limit}`);
-    } catch(e){ /* no crítico */ }
-
-    if (!res.ok) {
-      const txt = await res.text().catch(()=>'');
-      logDiag("API no OK. Cuerpo:", txt.slice(0,400));
-      throw new Error(`GitHub API respondió ${res.status} ${res.statusText}`);
-    }
-
-    data = await res.json();
-    if (!Array.isArray(data)) {
-      logDiag("Respuesta no es lista:", data);
-      throw new Error("Respuesta de la API no es un array (esperado)");
-    }
-    logDiag(`Se listaron ${data.length} items en /${folder}/`);
-  } catch (err) {
-    logDiag("❌ Error al consultar la API de GitHub:", err.message || err);
-    diag.innerHTML += `<div class="error">Error: ${err.message}. Comprueba: repo público, nombre de carpeta, rama correcta y límites de la API.</div>`;
-    return;
-  }
-
-  // 2) Filtrar imágenes permitidas
-  const files = data.filter(f => f.type === "file" && /\.(jpg|jpeg|png|gif|webp)$/i.test(f.name));
-  if (files.length === 0) {
-    logDiag("❌ No se encontraron archivos de imagen en la carpeta.");
-    diag.innerHTML += `<div class="error">No se encontraron imágenes en /${folder}/. Revisa que estén subidas a la rama ${branch}.</div>`;
-    return;
-  }
-
-  // 3) Para cada archivo, intentamos 3 URLs en orden:
-  //    1) jsDelivr CDN
-  //    2) raw.githubusercontent
-  //    3) dominio propio (si tu dominio es activo)
-  const domain = window.location.origin.replace(/^http:/,'https:'); // https://twinotters-photography.com
-  logDiag("Host actual (origin):", domain);
-
-  for (const file of files) {
-    const fname = file.name;
-    const urlsToTry = [
-      `https://cdn.jsdelivr.net/gh/${username}/${repo}@${branch}/${folder}/${encodeURIComponent(fname)}`,
-      `https://raw.githubusercontent.com/${username}/${repo}/${branch}/${folder}/${encodeURIComponent(fname)}`,
-      `${domain}/${folder}/${encodeURIComponent(fname)}`
-    ];
-    logDiag("Procesando:", fname, "→ probar URLs:", urlsToTry);
-
-    // Crear contenedor visual mientras probamos
-    const wrap = document.createElement('div');
-    wrap.style.minHeight = '80px';
-    wrap.style.display = 'flex';
-    wrap.style.alignItems = 'center';
-    wrap.style.justifyContent = 'center';
-    wrap.style.background = '#fff';
-    gallery.appendChild(wrap);
-
-    let loaded = false;
-    for (const url of urlsToTry) {
+    async function loadImages() {
+      const gallery = document.getElementById("gallery");
       try {
-        // intentamos cargar como imagen y esperar load/error
-        await new Promise((resolve, reject) => {
-          const img = new Image();
-          img.onload = () => resolve(img);
-          img.onerror = () => reject(new Error('img load failed'));
-          img.src = url + (url.includes('?') ? '&' : '?') + 'cachebust=' + Date.now(); // evitar cache antiguo
-        }).then((imgEl) => {
-          // si cargó, lo mostramos
-          wrap.innerHTML = '';
-          imgEl.style.width = '100%';
-          imgEl.style.height = 'auto';
-          imgEl.style.borderRadius = '8px';
-          wrap.appendChild(imgEl);
-          loaded = true;
-          logDiag('✅ Cargada con URL:', url);
-        });
-        if (loaded) break;
-      } catch (e) {
-        logDiag('❌ Falló URL:', url);
-        // seguir al siguiente url
+        const res = await fetch(apiUrl);
+        const data = await res.json();
+
+        data
+          .filter(file => file.type === "file" && /\.(jpg|jpeg|png|gif)$/i.test(file.name))
+          .forEach(file => {
+            const img = document.createElement("img");
+            img.src = file.download_url;
+            img.alt = file.name;
+            gallery.appendChild(img);
+          });
+      } catch (err) {
+        console.error("Error loading images:", err);
+        gallery.innerHTML = "<p>Could not load images.</p>";
       }
     }
 
-    if (!loaded) {
-      wrap.innerHTML = `<div class="small error">No se pudo cargar ${fname} (probadas ${urlsToTry.length} URLs)</div>`;
-      logDiag(`⚠️ No fue posible cargar ${fname} con ninguna URL.`);
-    }
-  }
-
-  logDiag('✅ Proceso terminado.');
-})();
-</script>
+    loadImages();
+  </script>
 </body>
 </html>
-
-
