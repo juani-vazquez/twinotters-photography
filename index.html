@@ -73,7 +73,7 @@
           .filter(file => file.type === "file" && /\.(jpg|jpeg|png|gif)$/i.test(file.name))
           .forEach(file => {
             const img = document.createElement("img");
-            img.src = file.download_url;
+            img.src = file.download_url.replace("github.com", "raw.githubusercontent.com").replace("/blob/", "/");
             img.alt = file.name;
             gallery.appendChild(img);
           });
