@@ -1,117 +1,90 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1.0">
-  <title>Twinotters' Photo Gallery</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Twinotters Photo Gallery</title>
   <style>
-    /* 🔹 Reset + estilos base */
     body {
       margin: 0;
       font-family: 'Poppins', sans-serif;
-      background: #fafafa;
-      color: #111;
+      background: #fefefe;
+      color: #222;
       display: flex;
       flex-direction: column;
       align-items: center;
     }
 
     h1 {
-      margin: 30px 0 10px;
+      margin: 20px 0;
       font-size: 2rem;
       text-align: center;
     }
 
-    p.subtitle {
-      margin-bottom: 40px;
-      font-size: 1rem;
-      color: #555;
-    }
-
-    /* 🔹 Contenedor principal */
     .gallery {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 20px;
-      width: 90%;
+      gap: 15px;
+      padding: 20px;
+      width: 100%;
       max-width: 1200px;
-      padding-bottom: 40px;
+      box-sizing: border-box;
     }
 
-    /* 🔹 Imágenes */
     .gallery img {
       width: 100%;
       height: auto;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-      opacity: 0;
-      transform: translateY(20px);
-      transition: opacity 1s ease, transform 0.8s ease;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
-    /* 🔹 Efecto al aparecer */
-    .gallery img.visible {
-      opacity: 1;
-      transform: translateY(0);
+    .gallery img:hover {
+      transform: scale(1.02);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.3);
     }
 
     footer {
-      margin: 40px 0;
+      margin: 30px 0;
       color: #777;
       font-size: 0.9rem;
-      text-align: center;
-    }
-
-    @media (max-width: 600px) {
-      h1 {
-        font-size: 1.5rem;
-        margin: 20px 0;
-      }
-
-      .gallery {
-        gap: 15px;
-      }
     }
   </style>
 </head>
 <body>
-
-  <h1>Twinotters Photography</h1>
-  <p class="subtitle">Nature & Street moments</p>
-
+  <h1>My Photo Gallery</h1>
   <div class="gallery" id="gallery"></div>
-
   <footer>© 2025 Twinotters — All Rights Reserved</footer>
 
   <script>
-    // 🔹 Cargar las imágenes desde JSON
-    fetch('images.json')
-      .then(res => res.json())
-      .then(images => {
-        const gallery = document.getElementById('gallery');
-        images.forEach(src => {
-          const img = document.createElement('img');
-          img.src = src;
-          img.alt = 'photo';
-          gallery.appendChild(img);
-        });
+    const username = "saraih"; // 👈 tu usuario de GitHub
+    const repo = "photo-gallery"; // 👈 el nombre del repo
+    const folder = "images"; // 👈 carpeta donde subís las fotos
 
-        // 🔹 Detectar cuando entran en pantalla
-        const observer = new IntersectionObserver((entries) => {
-          entries.forEach(entry => {
-            if (entry.isIntersecting) {
-              entry.target.classList.add('visible');
-              observer.unobserve(entry.target); // una vez visible, no sigue observando
-            }
+    const apiUrl = `https://api.github.com/repos/${username}/${repo}/contents/${folder}`;
+
+    async function loadImages() {
+      const gallery = document.getElementById("gallery");
+      try {
+        const res = await fetch(apiUrl);
+        const data = await res.json();
+
+        data
+          .filter(file => file.type === "file" && /\.(jpg|jpeg|png|gif)$/i.test(file.name))
+          .forEach(file => {
+            const img = document.createElement("img");
+            img.src = file.download_url;
+            img.alt = file.name;
+            gallery.appendChild(img);
           });
-        }, { threshold: 0.2 });
+      } catch (err) {
+        console.error("Error cargando imágenes:", err);
+        gallery.innerHTML = "<p>No se pudieron cargar las imágenes.</p>";
+      }
+    }
 
-        document.querySelectorAll('.gallery img').forEach(img => observer.observe(img));
-      })
-      .catch(err => console.error("Error loading images.json", err));
+    loadImages();
   </script>
-
 </body>
 </html>
 
