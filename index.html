@@ -19,30 +19,24 @@
   <footer>© 2025 Twinotters — All Rights Reserved</footer>
 
   <script>
-    const username = "juani-vazquez";
-    const repo = "twinotters-photography";
-    const folder = "images";
-    const branch = "main"; // <- cambialo si tu rama es 'master' u otra
-
-    const apiUrl = `https://api.github.com/repos/${username}/${repo}/contents/${folder}`;
-
     async function loadImages() {
       const gallery = document.getElementById("gallery");
-      try {
-        const res = await fetch(apiUrl);
-        if (!res.ok) throw new Error('GitHub API error: ' + res.status);
-        const data = await res.json();
 
-        data
-          .filter(file => file.type === "file" && /\.(jpg|jpeg|png|gif|webp)$/i.test(file.name))
-          .forEach(file => {
-            // Construir URL vía jsDelivr (CDN)
-            const cdnUrl = `https://cdn.jsdelivr.net/gh/${username}/${repo}@${branch}/${folder}/${encodeURIComponent(file.name)}`;
-            const img = document.createElement("img");
-            img.src = cdnUrl;
-            img.alt = file.name;
-            gallery.appendChild(img);
-          });
+      try {
+        // Usamos la misma URL base del sitio actual
+        const response = await fetch("./images/");
+        const text = await response.text();
+
+        // Extraemos nombres de archivos del HTML de directory listing (solo funciona en GH Pages)
+        const matches = [...text.matchAll(/href="([^"]+\.(?:jpg|jpeg|png|gif|webp))"/gi)];
+        if (matches.length === 0) throw new Error("No se encontraron imágenes");
+
+        matches.forEach(m => {
+          const img = document.createElement("img");
+          img.src = `./images/${m[1]}`;
+          img.alt = m[1];
+          gallery.appendChild(img);
+        });
 
       } catch (err) {
         console.error("Error cargando imágenes:", err);
@@ -50,7 +44,7 @@
       }
     }
 
-    loadImages();
+  loadImages();
   </script>
 </body>
 </html>
