@@ -3,174 +3,115 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport"
-        content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        content="width=device-width, initial-scale=1.0">
   <title>Twinotters' Photo Gallery</title>
   <style>
-    /* 🔹 Reset + asegurar pantalla completa */
-    html, body {
+    /* 🔹 Reset + estilos base */
+    body {
       margin: 0;
-      padding: 0;
-      width: 100vw;
-      height: 100vh;
-      overflow: hidden; /* Evita scroll y desplazamientos */
-      background: #fff;
       font-family: 'Poppins', sans-serif;
+      background: #fafafa;
       color: #111;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
     }
 
     h1 {
-      margin: 10px 0;
-      font-size: 1.4rem;
+      margin: 30px 0 10px;
+      font-size: 2rem;
       text-align: center;
-      flex-shrink: 0;
     }
 
-    /* 🔹 Carrusel ocupa el espacio restante */
-    .carousel {
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex: 1; /* ocupa toda la altura disponible */
+    p.subtitle {
+      margin-bottom: 40px;
+      font-size: 1rem;
+      color: #555;
+    }
+
+    /* 🔹 Contenedor principal */
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      width: 90%;
+      max-width: 1200px;
+      padding-bottom: 40px;
+    }
+
+    /* 🔹 Imágenes */
+    .gallery img {
       width: 100%;
-      max-width: 100vw;
-      overflow: hidden;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-      background: #fff;
+      height: auto;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 1s ease, transform 0.8s ease;
     }
 
-    .carousel-images {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    /* 🔹 Efecto al aparecer */
+    .gallery img.visible {
+      opacity: 1;
+      transform: translateY(0);
     }
-
-    .carousel-images img {
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: contain;
-      border-radius: 8px;
-      display: none;
-    }
-
-    .btn {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      background: rgba(0, 0, 0, 0.4);
-      color: white;
-      border: none;
-      width: 40px;
-      height: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      border-radius: 50%;
-      font-size: 1.2rem;
-      transition: background 0.3s, transform 0.2s;
-      z-index: 10;
-    }
-
-    .btn:hover {
-      background: rgba(0, 0, 0, 0.7);
-      transform: translateY(-50%) scale(1.1);
-    }
-
-    .prev { left: 10px; }
-    .next { right: 10px; }
 
     footer {
-      margin: 5px 0;
+      margin: 40px 0;
       color: #777;
-      font-size: 0.8rem;
+      font-size: 0.9rem;
       text-align: center;
-      flex-shrink: 0;
     }
 
-    @media (max-width: 700px) {
-      .btn {
-        width: 32px;
-        height: 32px;
-        font-size: 1rem;
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 1.5rem;
+        margin: 20px 0;
+      }
+
+      .gallery {
+        gap: 15px;
       }
     }
   </style>
 </head>
-
 <body>
 
-  <h1>My Photo Carousel</h1>
+  <h1>Twinotters Photography</h1>
+  <p class="subtitle">Nature & Street moments</p>
 
-  <div class="carousel" id="carousel">
-    <div class="carousel-images" id="carousel-images"></div>
-    <button class="btn prev" id="prevBtn">❮</button>
-    <button class="btn next" id="nextBtn">❯</button>
-  </div>
+  <div class="gallery" id="gallery"></div>
 
   <footer>© 2025 Twinotters — All Rights Reserved</footer>
 
   <script>
-    let index = 0;
-    let total = 0;
-
+    // 🔹 Cargar las imágenes desde JSON
     fetch('images.json')
       .then(res => res.json())
       .then(images => {
-        const slides = document.getElementById("carousel-images");
+        const gallery = document.getElementById('gallery');
         images.forEach(src => {
           const img = document.createElement('img');
           img.src = src;
           img.alt = 'photo';
-          slides.appendChild(img);
+          gallery.appendChild(img);
         });
 
-        total = slides.children.length;
-        showSlide(0);
+        // 🔹 Detectar cuando entran en pantalla
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('visible');
+              observer.unobserve(entry.target); // una vez visible, no sigue observando
+            }
+          });
+        }, { threshold: 0.2 });
 
-        document.getElementById("prevBtn").addEventListener("click", () => moveSlide(-1));
-        document.getElementById("nextBtn").addEventListener("click", () => moveSlide(1));
+        document.querySelectorAll('.gallery img').forEach(img => observer.observe(img));
       })
       .catch(err => console.error("Error loading images.json", err));
-
-    function showSlide(idx) {
-      const all = document.querySelectorAll('#carousel-images img');
-      all.forEach((img, i) => {
-        img.style.display = i === idx ? 'block' : 'none';
-      });
-    }
-
-    function moveSlide(step) {
-      index = (index + step + total) % total;
-      showSlide(index);
-    }
-
-    // ✅ Swipe detection solo si es touchscreen
-    if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
-      const carousel = document.getElementById('carousel');
-      let startX = 0;
-
-      carousel.addEventListener('touchstart', (e) => {
-        startX = e.touches[0].clientX;
-      }, { passive: true });
-
-      carousel.addEventListener('touchend', (e) => {
-        const endX = e.changedTouches[0].clientX;
-        const diff = endX - startX;
-
-        if (Math.abs(diff) > 50) {
-          if (diff < 0) moveSlide(1);
-          else moveSlide(-1);
-        }
-      }, { passive: true });
-    }
   </script>
 
 </body>
 </html>
+
