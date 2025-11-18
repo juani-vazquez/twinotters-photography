@@ -162,6 +162,35 @@
         right: 20px;
       }
     }
+
+    .filter-bar {
+      margin-top: 20px;
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .filter-bar button {
+      padding: 8px 16px;
+      border-radius: 20px;
+      border: 1px solid #ccc;
+      background: #fff;
+      cursor: pointer;
+      transition: 0.2s;
+      font-size: 0.9rem;
+    }
+
+    .filter-bar button:hover {
+      background: #f0f0f0;
+    }
+
+    .filter-bar button.active {
+      background: #222;
+      color: white;
+      border-color: #222;
+    }
+
   </style>
 </head>
 <body>
@@ -173,6 +202,13 @@
   </header>
 
   <h1>My Photo Gallery</h1>
+
+  <div class="filter-bar">
+    <button data-filter="all" class="active">All</button>
+    <button data-filter="street">Street</button>
+    <button data-filter="architecture">Architecture</button>
+    <button data-filter="nature">Nature</button>
+  </div>
 
   <div class="gallery" id="gallery"></div>
 
@@ -210,10 +246,24 @@
             const img = document.createElement("img");
             img.src = file.download_url;
             img.alt = file.name;
+
+            // Detect category
+            const lower = file.name.toLowerCase();
+            if (lower.includes("street") || lower.includes("urban")) {
+              img.dataset.category = "street";
+            } else if (lower.includes("arch") || lower.includes("building") || lower.includes("architecture")) {
+              img.dataset.category = "architecture";
+            } else if (lower.includes("nature") || lower.includes("forest") || lower.includes("flora") || lower.includes("fauna")) {
+              img.dataset.category = "nature";
+            } else {
+              img.dataset.category = "other"; // fallback
+            }
+
             img.addEventListener("click", () => {
               lightboxImg.src = img.src;
               lightbox.style.display = "flex";
             });
+
             gallery.appendChild(img);
           });
 
@@ -227,6 +277,26 @@
         gallery.innerHTML = "<p>Could not load images.</p>";
       }
     }
+
+    // Filtering logic
+    document.addEventListener("click", (e) => {
+      if (e.target.matches(".filter-bar button")) {
+        const filter = e.target.dataset.filter;
+
+        document.querySelectorAll(".filter-bar button").forEach(btn =>
+          btn.classList.remove("active")
+        );
+        e.target.classList.add("active");
+
+        document.querySelectorAll("#gallery img").forEach(img => {
+          if (filter === "all" || img.dataset.category === filter) {
+            img.style.display = "block";
+          } else {
+            img.style.display = "none";
+          }
+        });
+      }
+    });
 
     loadImages();
   </script>
