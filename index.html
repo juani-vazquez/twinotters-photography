@@ -286,6 +286,7 @@
             const img = document.createElement("img");
             img.src = file.download_url;
             img.alt = file.name;
+            img.loading = "lazy";
 
             // Detect category
             const lower = file.name.toLowerCase();
