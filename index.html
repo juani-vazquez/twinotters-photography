@@ -318,10 +318,7 @@
   </footer>
 
   <script>
-    const username = "juani-vazquez";
-    const repo = "twinotters-photography";
     const folder = "images";
-    const apiUrl = `https://api.github.com/repos/${username}/${repo}/contents/${folder}`;
 
     // ------------------------------------------------------------------
     // CAPTIONS live in captions.json, in the same folder as this file.
@@ -382,12 +379,20 @@
       try {
         await loadCaptions();
 
-        const res = await fetch(apiUrl);
-        const data = await res.json();
+        // images.json is a static list of filenames, kept up to date
+        // automatically by a GitHub Action whenever the images/ folder
+        // changes. Reading this is much faster than calling the GitHub
+        // API live, since it's just a small static file served by the
+        // CDN instead of a rate-limited metadata endpoint.
+        const res = await fetch("images.json", { cache: "no-store" });
+        const filenames = await res.json();
 
-        const imageFiles = data.filter(
-          file => file.type === "file" && /\.(jpg|jpeg|png|gif)$/i.test(file.name)
-        );
+        const imageFiles = filenames
+          .filter(name => /\.(jpg|jpeg|png|gif)$/i.test(name))
+          .map(name => ({
+            name,
+            download_url: `${folder}/${name}`
+          }));
 
         // JSON-LD structured data helps Google understand this page is a
         // photo gallery and can surface individual images with context.
