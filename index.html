@@ -4,7 +4,17 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" type="image/png" href="favicon.png">
-  <title>Twinotters Photo Gallery</title>
+
+  <!-- SEO: title + description are what show up in Google search results -->
+  <title>Twinotters Photography — Street, Architecture & Nature by Juani</title>
+  <meta name="description" content="A photo gallery by Juani (Twinotters) featuring street, architecture, and nature photography. Browse and explore images captured along the way.">
+
+  <!-- Open Graph tags: control how the site looks when shared/linked (Pinterest, social, etc.) -->
+  <meta property="og:title" content="Twinotters Photography — Street, Architecture & Nature">
+  <meta property="og:description" content="A photo gallery by Juani featuring street, architecture, and nature photography.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="favicon.png">
+
   <style>
     body {
       margin: 0;
@@ -58,25 +68,52 @@
     .gallery {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 20px;
+      gap: 24px;
       padding: 20px 40px;
       width: 100%;
       max-width: 1200px;
       box-sizing: border-box;
     }
 
+    figure.photo-card {
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      background: #232323;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    figure.photo-card:hover {
+      transform: scale(1.02);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.6);
+    }
+
     .gallery img {
       width: 100%;
       height: auto;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      display: block;
       cursor: pointer;
     }
 
-    .gallery img:hover {
-      transform: scale(1.03);
-      box-shadow: 0 6px 16px rgba(0,0,0,0.6);
+    figcaption {
+      padding: 10px 14px 14px;
+    }
+
+    figcaption .photo-title {
+      font-weight: 600;
+      font-size: 0.95rem;
+      margin: 0 0 4px;
+      color: #f2f2f2;
+    }
+
+    figcaption .photo-desc {
+      font-size: 0.85rem;
+      color: #aaa;
+      margin: 0;
+      line-height: 1.4;
     }
 
     footer {
@@ -94,6 +131,7 @@
       width: 100vw;
       height: 100vh;
       background: rgba(0,0,0,0.9);
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       z-index: 1000;
@@ -102,10 +140,22 @@
 
     .lightbox img {
       max-width: 90%;
-      max-height: 85%;
+      max-height: 80%;
       border-radius: 12px;
       box-shadow: 0 0 20px rgba(255,255,255,0.2);
       animation: zoomIn 0.3s ease;
+    }
+
+    .lightbox .lightbox-caption {
+      max-width: 90%;
+      text-align: center;
+      margin-top: 14px;
+      color: #ddd;
+    }
+
+    .lightbox .lightbox-caption .photo-title {
+      font-weight: 600;
+      margin: 0 0 4px;
     }
 
     .lightbox .close {
@@ -228,14 +278,13 @@
 
   <section class="about">
     <p>
-      Hi, I'm Juani - I enjoy photographing Street, Architecture, and Nature.  
-      This is a simple gallery to share the images I capture along the way.
+      Hi, I'm Juani — I photograph street scenes, architecture, and nature.
+      This gallery is where I share the images I capture along the way.
     </p>
     <a class="insta-link" href="https://instagram.com/twinotters" target="_blank">
       Follow me on Instagram → @twinotters
     </a>
   </section>
-
 
   <div class="filter-bar">
     <button data-filter="all" class="active">All</button>
@@ -249,65 +298,150 @@
   <div class="lightbox" id="lightbox">
     <button class="close" id="closeBtn">×</button>
     <img id="lightbox-img" src="" alt="">
+    <div class="lightbox-caption">
+      <p class="photo-title" id="lightbox-title"></p>
+      <p class="photo-desc" id="lightbox-desc"></p>
+    </div>
   </div>
 
   <footer>
     © 2026 Twinotters - All Rights Reserved<br>
     <span style="font-size: 0.8rem; color: #999;">
-      If you'd like to use any of these photos, I’d appreciate a credit to my Instagram @twinotters  
+      If you'd like to use any of these photos, I'd appreciate a credit to my Instagram @twinotters
       or a link to twinotters-photography.com.
     </span>
     <br><br>
-    <a href="https://instagram.com/twinotters" target="_blank" 
+    <a href="https://instagram.com/twinotters" target="_blank"
       style="color: #6ea8fe; text-decoration: none; font-size: 0.9rem;">
       Instagram - @twinotters
     </a>
   </footer>
 
-
   <script>
-    const username = "juani-vazquez"; 
+    const username = "juani-vazquez";
     const repo = "twinotters-photography";
-    const folder = "images"; 
+    const folder = "images";
     const apiUrl = `https://api.github.com/repos/${username}/${repo}/contents/${folder}`;
+
+    // ------------------------------------------------------------------
+    // CAPTIONS live in captions.json, in the same folder as this file.
+    // That's the only file you need to touch when you post a new photo:
+    // add one entry keyed by the exact image filename, with a title,
+    // description, and category. This text becomes the alt text AND the
+    // caption shown under each photo, which is what Google actually
+    // reads to understand and rank the image.
+    //
+    // Any image NOT listed in captions.json falls back to a title
+    // guessed from its filename, and an empty description.
+    // ------------------------------------------------------------------
+    let CAPTIONS = {};
+
+    async function loadCaptions() {
+      try {
+        const res = await fetch("captions.json", { cache: "no-store" });
+        if (res.ok) {
+          CAPTIONS = await res.json();
+        }
+      } catch (err) {
+        console.warn("Could not load captions.json, falling back to filenames.", err);
+      }
+    }
+
+    function humanizeFilename(name) {
+      return name
+        .replace(/\.[^/.]+$/, "")
+        .replace(/[_-]+/g, " ")
+        .replace(/\b\w/g, c => c.toUpperCase());
+    }
+
+    function detectCategory(filename) {
+      const lower = filename.toLowerCase();
+      if (lower.includes("street") || lower.includes("urban")) return "street";
+      if (lower.includes("arch") || lower.includes("building")) return "architecture";
+      if (lower.includes("nature") || lower.includes("forest") || lower.includes("flora") || lower.includes("fauna")) return "nature";
+      return "other";
+    }
+
+    function getMeta(file) {
+      const override = CAPTIONS[file.name];
+      return {
+        title: override?.title || humanizeFilename(file.name),
+        description: override?.description || "",
+        category: override?.category || detectCategory(file.name)
+      };
+    }
 
     async function loadImages() {
       const gallery = document.getElementById("gallery");
       const lightbox = document.getElementById("lightbox");
       const lightboxImg = document.getElementById("lightbox-img");
+      const lightboxTitle = document.getElementById("lightbox-title");
+      const lightboxDesc = document.getElementById("lightbox-desc");
       const closeBtn = document.getElementById("closeBtn");
 
       try {
+        await loadCaptions();
+
         const res = await fetch(apiUrl);
         const data = await res.json();
 
-        data
-          .filter(file => file.type === "file" && /\.(jpg|jpeg|png|gif)$/i.test(file.name))
-          .forEach(file => {
-            const img = document.createElement("img");
-            img.src = file.download_url;
-            img.alt = file.name;
-            img.loading = "lazy";
+        const imageFiles = data.filter(
+          file => file.type === "file" && /\.(jpg|jpeg|png|gif)$/i.test(file.name)
+        );
 
-            // Detect category
-            const lower = file.name.toLowerCase();
-            if (lower.includes("street") || lower.includes("urban")) {
-              img.dataset.category = "street";
-            } else if (lower.includes("arch") || lower.includes("building") || lower.includes("architecture")) {
-              img.dataset.category = "architecture";
-            } else if (lower.includes("nature") || lower.includes("forest") || lower.includes("flora") || lower.includes("fauna")) {
-              img.dataset.category = "nature";
-            } else {
-              img.dataset.category = "other"; // fallback
-            }
+        // JSON-LD structured data helps Google understand this page is a
+        // photo gallery and can surface individual images with context.
+        const structuredData = {
+          "@context": "https://schema.org",
+          "@type": "ImageGallery",
+          "name": "Twinotters Photography Gallery",
+          "image": imageFiles.map(f => f.download_url)
+        };
+        const ldScript = document.createElement("script");
+        ldScript.type = "application/ld+json";
+        ldScript.textContent = JSON.stringify(structuredData);
+        document.head.appendChild(ldScript);
 
-            img.addEventListener("click", () => {
-              lightboxImg.src = img.src;
-              lightbox.style.display = "flex";
-            });
+        imageFiles.forEach(file => {
+          const meta = getMeta(file);
 
-            gallery.appendChild(img);
+          const card = document.createElement("figure");
+          card.className = "photo-card";
+          card.dataset.category = meta.category;
+
+          const img = document.createElement("img");
+          img.src = file.download_url;
+          img.alt = meta.description
+            ? `${meta.title} — ${meta.description}`
+            : meta.title;
+          img.loading = "lazy";
+
+          const figcaption = document.createElement("figcaption");
+          const titleEl = document.createElement("p");
+          titleEl.className = "photo-title";
+          titleEl.textContent = meta.title;
+          figcaption.appendChild(titleEl);
+
+          if (meta.description) {
+            const descEl = document.createElement("p");
+            descEl.className = "photo-desc";
+            descEl.textContent = meta.description;
+            figcaption.appendChild(descEl);
+          }
+
+          card.appendChild(img);
+          card.appendChild(figcaption);
+
+          card.addEventListener("click", () => {
+            lightboxImg.src = img.src;
+            lightboxImg.alt = img.alt;
+            lightboxTitle.textContent = meta.title;
+            lightboxDesc.textContent = meta.description;
+            lightbox.style.display = "flex";
           });
+
+          gallery.appendChild(card);
+        });
 
         closeBtn.addEventListener("click", () => lightbox.style.display = "none");
         lightbox.addEventListener("click", (e) => {
@@ -330,12 +464,10 @@
         );
         e.target.classList.add("active");
 
-        document.querySelectorAll("#gallery img").forEach(img => {
-          if (filter === "all" || img.dataset.category === filter) {
-            img.style.display = "block";
-          } else {
-            img.style.display = "none";
-          }
+        document.querySelectorAll("#gallery .photo-card").forEach(card => {
+          card.style.display = (filter === "all" || card.dataset.category === filter)
+            ? "flex"
+            : "none";
         });
       }
     });
