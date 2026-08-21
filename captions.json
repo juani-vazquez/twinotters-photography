@@ -1,15 +1,141 @@
 {
   "_readme": "Add one entry per image filename (must exactly match the filename in your GitHub images/ folder, including extension). category must be one of: street, architecture, nature. This _readme key is ignored by the site.",
 
-  "street_04.jpg": {
-    "title": "Rainy night on Corrientes Ave",
-    "description": "Buenos Aires, 2026. Neon reflections on wet pavement after a summer storm.",
+  "arch_01.jpg": {
+    "title": "Botanical Manor",
+    "description": "Buenos Aires, Novemeber 2025.",
+    "category": "architecture"
+  },
+
+  "arch_02.jpg": {
+    "title": "Like a sleeping city giant.",
+    "description": "Puerto Madero, Buenos Aires, November 2025.",
+    "category": "architecture"
+  },
+
+  "arch_04.jpg": {
+    "title": "Blue Framed Streets",
+    "description": "Puerto Madero, Buenos Aires.",
+    "category": "architecture"
+  },
+
+  "arch_05.jpg": {
+    "title": "Old walls, new heights.",
+    "description": "",
+    "category": "architecture"
+  },
+
+  "arch_06.jpg": {
+    "title": "Orange meets blue.",
+    "description": "",
+    "category": "architecture"
+  },
+
+  "arch_07.jpg": {
+    "title": "Urban nature moment.",
+    "description": "",
+    "category": "architecture"
+  },
+
+  "arch_08.jpg": {
+    "title": "Looking up.",
+    "description": "",
+    "category": "architecture"
+  },
+
+  "arch_09.jpg": {
+    "title": "A walk along Puerto Madero.",
+    "description": "",
+    "category": "architecture"
+  },
+
+  "nature_01.jpg": {
+    "title": "Grace meets nature.",
+    "description": "",
+    "category": "nature"
+  },
+
+  "nature_02.jpg": {
+    "title": "Heaven's gift.",
+    "description": "Recoleta, Buenos Aires. Afternoon light through the dome.",
+    "category": "nature"
+  },
+
+  "nature_03.jpg": {
+    "title": "Calm beneath the trees.",
+    "description": "",
+    "category": "nature"
+  },
+
+  "nature_04.jpg": {
+    "title": "Stone and sunlight.",
+    "description": "",
+    "category": "nature"
+  },
+
+  "nature_05.jpg": {
+    "title": "Crown of leaves.",
+    "description": "",
+    "category": "nature"
+  },
+
+  "nature_06.jpg": {
+    "title": "Sunlit pond beauty.",
+    "description": "",
+    "category": "nature"
+  },
+
+  "street.jpg": {
+    "title": "Urban delta.",
+    "description": "",
     "category": "street"
   },
 
-  "arch_church.jpg": {
-    "title": "Interior of Iglesia del Pilar",
-    "description": "Recoleta, Buenos Aires. Afternoon light through the dome.",
-    "category": "architecture"
+  "street_02.jpg": {
+    "title": "Morning tracks.",
+    "description": "",
+    "category": "street"
+  },
+
+  "street_03.jpg": {
+    "title": "Crimson cafe.",
+    "description": "",
+    "category": "nature"
+  },
+
+  "street_04.jpg": {
+    "title": "Crimson classic.",
+    "description": "",
+    "category": "street"
+  },
+
+  "street_05.jpg": {
+    "title": "Sunny street flavors.",
+    "description": "",
+    "category": "street"
+  },
+
+  "street_06.jpg": {
+    "title": "Follow the colors.",
+    "description": "",
+    "category": "street"
+  },
+
+  "street_07.jpg": {
+    "title": "Blue sky charm.",
+    "description": "",
+    "category": "street"
+  },
+
+  "street_08.jpg": {
+    "title": "Blooming street.",
+    "description": "",
+    "category": "street"
+  },
+
+  "street_09.jpg": {
+    "title": "Little streets, big charm.",
+    "description": "",
+    "category": "street"
   }
 }
