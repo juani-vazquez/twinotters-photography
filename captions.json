@@ -1,0 +1,15 @@
+{
+  "_readme": "Add one entry per image filename (must exactly match the filename in your GitHub images/ folder, including extension). category must be one of: street, architecture, nature. This _readme key is ignored by the site.",
+
+  "street_04.jpg": {
+    "title": "Rainy night on Corrientes Ave",
+    "description": "Buenos Aires, 2026. Neon reflections on wet pavement after a summer storm.",
+    "category": "street"
+  },
+
+  "arch_church.jpg": {
+    "title": "Interior of Iglesia del Pilar",
+    "description": "Recoleta, Buenos Aires. Afternoon light through the dome.",
+    "category": "architecture"
+  }
+}
